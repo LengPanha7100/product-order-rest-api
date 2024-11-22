@@ -1,0 +1,40 @@
+services:
+#  localhost or ip
+  product-order-rest-api-postgres:
+
+    image: postgres:latest
+    restart: always
+    environment:
+      POSTGRES_DB: product_order_rest_api2_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 12345
+    volumes:
+      - product-order-rest-api-postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5454:5432"
+    networks:
+      - product-order-rest-api-network
+
+  product-order-rest-api-api:
+#    when docker compose up it also build image from docker file
+    build:
+      context: .
+      dockerfile: Dockerfile
+#     when service down it always restart
+    restart: always
+    ports:
+      - "8081:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://product-order-rest-api-postgres:5432/product_order_rest_api2_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: 12345
+    depends_on:
+      - product-order-rest-api-postgres
+    networks:
+      - product-order-rest-api-network
+
+volumes:
+  product-order-rest-api-postgres-data:
+networks:
+  product-order-rest-api-network:
+    driver: bridge
